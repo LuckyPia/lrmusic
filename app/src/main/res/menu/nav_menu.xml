@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<group android:checkableBehavior="single">
+    <item
+        android:id="@+id/nav_setting"
+        android:icon="@mipmap/ic_download_setting"
+        android:title="setting"/>
+    <item
+        android:id="@+id/nav_playing"
+        android:icon="@mipmap/music_playlist_del"
+        android:title="playing"/>
+    <item
+        android:id="@+id/sharing"
+        android:icon="@mipmap/music_icon_share"
+        android:title="sharing"/>
+    <item
+        android:id="@+id/subject"
+        android:icon="@mipmap/music_icon_subject"
+        android:title="subject"/>
+
+</group>
+</menu>

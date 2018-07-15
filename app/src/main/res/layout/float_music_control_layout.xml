@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--浮动音乐控制布局-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_gravity="bottom"
+    android:id="@+id/float_Music_Container"
+    android:orientation="vertical"
+    app:elevation="8dp"
+    android:background="@drawable/boder">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_gravity="bottom"
+        android:background="@color/colorHalfTransparentWrite">
+        <!--音乐图片-->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="10dp">
+            <TextView
+                android:id="@+id/float_Music_Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textSize="18dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="#000000"/>
+            <TextView
+                android:id="@+id/float_Music_Artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorPrimarySliver"
+                android:textSize="12dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:layout_marginTop="12dp"
+                android:layout_marginLeft="5dp"/>
+        </LinearLayout>
+        <!--右边的控制按钮-->
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="180dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true">
+
+            <com.example.me.materialtest.CircleProgressBar
+                android:id="@+id/float_ProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/float_Play_Btn"
+                app:layout_constraintEnd_toEndOf="@+id/float_Play_Btn"
+                app:layout_constraintStart_toStartOf="@+id/float_Play_Btn"
+                app:layout_constraintTop_toTopOf="@+id/float_Play_Btn"
+                app:layout_constraintVertical_bias="0.47000003" />
+
+                <!--播放或者暂停按钮-->
+            <ImageView
+                android:id="@+id/float_Play_Btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/playbar_play_btn"
+                android:padding="10dip"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/float_Next_Music"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!--下一曲音乐-->
+            <ImageView
+                android:id="@+id/float_Next_Music"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/playbar_btn_next"
+                android:padding="10dip"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+    </RelativeLayout>
+    <!--音乐进度-->
+    <ProgressBar
+        android:id="@+id/float_Music_ProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="0"
+        android:visibility="visible"
+        style="@style/ProgressBar_Mini"/>
+
+</LinearLayout>

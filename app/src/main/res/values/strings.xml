@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">左右音乐</string>
+    <string name="title_activity_second">SecondActivity</string>
+    <string name="stop">暂停</string>
+    <string name="play">播放</string>
+    <string name="replay">重播</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="tab_menu_alert">提醒</string>
+    <string name="tab_menu_profile">信息</string>
+    <string name="tab_menu_pay">我的</string>
+    <string name="tab_menu_setting">设置</string>
+    <string name="title_activity_fourth">FourthActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="sequential_playback">顺序播放</string>
+    <string name="random_play">随机播放</string>
+    <string name="single_tune_circulation">单曲循环</string>
+    <string name="singer">歌曲名称</string>
+    <string name="shang_biao">Copyright © 2018 lrmusic</string>
+</resources>

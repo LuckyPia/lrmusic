@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:orientation="vertical">
+
+    <CheckBox
+        android:id="@+id/favoriteItem_layout_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:gravity="center_vertical"
+        android:checked="true"
+        android:button="@null"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/checkbox_collect"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="45dp"
+        android:textSize="18dp"
+        android:textColor="@color/bg_black"
+        android:id="@+id/fav_item_song_name"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fav_item_song_name"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="12dp"
+        android:textColor="@color/text_hui"
+        android:id="@+id/fav_item_song_singer"/>
+
+</RelativeLayout>

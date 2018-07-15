@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="8dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/bg_white"
+    app:cardElevation="1dp"
+    android:id="@+id/item_song">
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <CheckBox
+        android:id="@+id/songItem_layout_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:gravity="center_vertical"
+        android:checked="false"
+        android:button="@null"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/checkbox_collect"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="45dp"
+        android:textSize="18dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@color/bg_black"
+        android:id="@+id/item_song_name"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/item_song_name"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="12dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@color/text_hui"
+        android:id="@+id/item_song_size"/>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/music_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12dp"
+        android:layout_centerVertical="true"
+        android:layout_gravity="right"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:text="00:00"
+        android:textColor="@android:color/black"/>
+
+
+</android.support.v7.widget.CardView>

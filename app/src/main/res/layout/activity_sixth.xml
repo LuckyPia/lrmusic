@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_bg_play">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+    </android.support.design.widget.AppBarLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
+        app:layout_constraintVertical_bias="0.07999998">
+
+        <TextView
+            android:id="@+id/text3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/bg_black"
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/singerName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text3"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/bg_black"
+            android:textSize="12dp" />
+
+    </RelativeLayout>
+
+    <com.example.me.materialtest.WaveformView
+        android:id="@+id/visualizerview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout2" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="54dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/now"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textColor="#000000"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp"
+            android:layout_toLeftOf="@+id/seekbar"
+            android:text="00:00"
+            android:textColor="#000000"
+            android:textSize="12dp" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            style="@style/CustomSeekbarStyle"
+            android:layout_width="870px"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:background="@null" />
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp"
+            android:layout_toRightOf="@+id/seekbar"
+            android:text="00:00"
+            android:textColor="#000000"
+            android:textSize="12dp" />
+
+        <ImageButton
+            android:id="@+id/music_play"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_below="@+id/seekbar"
+            android:layout_marginRight="140dp"
+            android:layout_marginTop="55dp"
+            android:layout_toLeftOf="@id/playImage"
+            android:src="@drawable/music_playmode_listloop"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"/>
+
+        <ImageButton
+            android:id="@+id/precious"
+            android:layout_width="42dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekbar"
+            android:layout_marginRight="40dp"
+            android:layout_marginTop="45dp"
+            android:layout_toLeftOf="@+id/playImage"
+            android:src="@drawable/ic_precious"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"/>
+
+        <ImageButton
+            android:id="@+id/playImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekbar"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="45dp"
+            android:src="@drawable/ic_play"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekbar"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="45dp"
+            android:layout_toRightOf="@id/playImage"
+            android:src="@drawable/ic_next"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"/>
+
+        <CheckBox
+            android:id="@+id/song_collect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekbar"
+            android:layout_marginLeft="140dp"
+            android:layout_marginTop="55dp"
+            android:layout_toRightOf="@id/playImage"
+            android:background="@drawable/checkbox_collect"
+            android:button="@null"
+            android:checked="false"
+            android:focusable="false"
+            android:gravity="center_vertical" />
+
+    </RelativeLayout>
+</android.support.constraint.ConstraintLayout>
