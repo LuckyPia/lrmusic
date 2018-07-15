@@ -48,30 +48,29 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
     private ImageButton  nextButton;
     private ImageButton preciousButton;
     private  ImageButton musicPlay;
-    private static ImageButton imageButton;
+    private ImageButton imageButton;
     private Animation animation;
     private ImageView imageView;
     private Mp3Info song;
     private boolean checked;
     private TextView now;
-    private static  SeekBar mSeekBar;
-    private static  TextView mTextView;
-    private static  TextView mTextView2;
-    private static  TextView mSingerName;
-    private static  TextView mTextView3;
+    private  SeekBar mSeekBar;
+    private  TextView mTextView;
+    private  TextView mTextView2;
+    private  TextView mSingerName;
+    private  TextView mTextView3;
+    @SuppressLint("StaticFieldLeak")
     private static WaveformView mVisualizerView;
     private MyApp app = null;
     private CheckBox cbx ;
     private static android.support.v7.app.ActionBar actionBar;
     //进度条下面的当前进度文字，将毫秒化为m:ss格式
+    @SuppressLint("SimpleDateFormat")
     private static  SimpleDateFormat time = new SimpleDateFormat("mm:ss");
     private static Visualizer mVisualizer;
-    private LinearLayout layout;
     private Intent intent;
     private int newi;
     private Flag newf;
-    protected float mFirstX;//触摸下去的位置
-    protected float mCurrentX;//滑动时Y的位置
     private int mTouchShop=300;//最小滑动距离
 
 
@@ -81,13 +80,12 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
 
     //public static MyHandler mHandler = new MyHandler();
     @SuppressLint("HandlerLeak")
-    public static Handler mHandler=new Handler(){
+    public Handler mHandler=new Handler(){
         //public Bundle b=new Bundle();
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case  1:
-                    //mSeekBar.setProgress(mMyBinder.getPlayPosition());
                     mSeekBar.setMax(mMyBinder.getProgress());
                     mTextView3.setText(mMyBinder.getSongName());
                     mSingerName.setText(mMyBinder.getSingerName());
@@ -108,12 +106,7 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sixth);
-        layout = new LinearLayout(this);
         app = (MyApp)getApplication();
-
-        //SixActivity被创建时标记
-        SixActivityIsOnCreate f=new SixActivityIsOnCreate();
-        f.setSaioc(1);
 
         //View初始化
         initView();
@@ -157,7 +150,6 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
         return super.onOptionsItemSelected(item);
     }
 
-
     //获取到权限回调方法
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull  String[]permissions, @NonNull int[] grantResults) {
@@ -181,6 +173,17 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
         public void onServiceConnected(ComponentName name, IBinder service) {
             mMyBinder = (MediaService.MyBinder) service;
             //mMediaService = ((MediaService.MyBinder) service).getInstance();
+            mMyBinder.getMyService().setCallback(new MediaService.Callback(){
+                @Override
+                public void onDataChange(String data) {
+                    Message msg = new Message();
+                    Bundle b = new Bundle();
+                    b.putString("data",data);
+                    msg.setData(b);
+                    msg.what=1;
+                    mHandler.sendMessage(msg);
+                }
+            });
             setupVisualizerFxAndUi();
             newUI();
             Log.d(TAG, "Service与SixthActivity已连接");
@@ -298,12 +301,12 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
             case R.id.song_collect:
                 checked = app.favoriteList.contains(song);
                 if(checked){
-                    ((MyApp) app).favoriteList.remove(song);
+                    app.favoriteList.remove(song);
                     song.setFavorite("NO");
                     show_Toast("已取消收藏");
 
                 }else{
-                    ((MyApp) app).favoriteList.add(song);
+                    app.favoriteList.add(song);
                     song.setFavorite("YES");
                     show_Toast("已添加收藏");
                 }
@@ -312,9 +315,6 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
             case R.id.music_play:
                 if(type.equals("0")){
                     musicPlay.setImageResource(R.drawable.music_playmode_singloop);
-                    //musicPlay.setText(R.string.single_tune_circulation);
-                    //PlayFlag f=new PlayFlag();
-                    //f.setPlayflag(1);
                     p.save("1");
                     show_Toast("当前为单曲循环");
                 }else if(type.equals("1")){

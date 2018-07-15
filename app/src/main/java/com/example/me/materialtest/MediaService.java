@@ -1,5 +1,6 @@
 package com.example.me.materialtest;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -56,17 +57,13 @@ public class MediaService extends Service {
     private RemoteViews contentView;
     //初始化MediaPlayer
     private static MediaPlayer mediaPlayer = null;
-    static MediaPlayer getMedia(){
-        if(mediaPlayer == null){
-            mediaPlayer = new MediaPlayer();
-        }
-        return mediaPlayer;
-    }
+    private Callback callback;
+    private String data = "服务正在运行";
+
+
     public MediaPlayer mMediaPlayer=getMedia();
-    //public MediaPlayer mMediaPlayer = new MediaPlayer();
     private MusicDao dao = null;
 
-    public final static String ACTION_BUTTON = "com.example.me.materialtest.ButtonClick";
     private Notification notification;
     private RemoteViews remoteViews;
     private ButtonBroadcastReceiver playerReceiver;
@@ -74,7 +71,13 @@ public class MediaService extends Service {
     private NotificationManager manager;
     MyApp app=null;
 
-
+    static MediaPlayer getMedia(){
+        //单例模式
+        if(mediaPlayer == null){
+            mediaPlayer = new MediaPlayer();
+        }
+        return mediaPlayer;
+    }
     private void getMusic(){
         dao = MusicDao.getInstance(this);
         dao.init();
@@ -133,13 +136,8 @@ public class MediaService extends Service {
         }catch(Exception e){
             e.printStackTrace();
         }
-        /*if(i==Flag.Getflag()) {
-
-        }else{*/
-            i = Flag.Getflag();
-            iniMediaPlayerFile(i);
-            //playMusic();
-        //}
+        i = Flag.Getflag();
+        iniMediaPlayerFile(i);
 
 
         //播放完成监听
@@ -176,8 +174,6 @@ public class MediaService extends Service {
                 }
                 initNotificationBar();
                 sendMessage_1();
-                sendMessage_2();
-
 
             }
         });
@@ -198,6 +194,14 @@ public class MediaService extends Service {
         public MediaService getInstance() {
             return MediaService.this;
         }*/
+
+        public void setData(String data){
+            MediaService.this.data = data;
+        }
+        public MediaService getMyService(){
+            return MediaService.this;
+        }
+
         /**
          * 播放音乐
          */
@@ -405,22 +409,22 @@ public class MediaService extends Service {
             String action = intent.getAction();//获取action标记，用户区分点击事件
             if ("play".equals(action)) {
                 mBinder.ppMusic();
-                sendMessage_2();
+                sendMessage_1();
                 System.out.println("play");
             }
             else if ("next".equals(action)) {
                 mBinder.nextMusic();
-                sendMessage_2();
+                sendMessage_1();
                 System.out.println("next");
             } else if ("precious".equals(action)) {
                 mBinder.preciousMusic();
-                sendMessage_2();
+                sendMessage_1();
                 System.out.println("precious");
             }else if ("open".equals(action)) {
                 Intent open=new Intent(MediaService.this,SixthActivity.class);
                 startActivity(open);
                 try {
-                    Object statusBarManager = context.getSystemService("statusbar");
+                    @SuppressLint("WrongConstant") Object statusBarManager = context.getSystemService("statusbar");
                     Method collapse;
 
                     if (Build.VERSION.SDK_INT <= 16) {
@@ -484,6 +488,7 @@ public class MediaService extends Service {
         PendingIntent pIntentCancel = PendingIntent.getBroadcast(this, 0,
                 intentCancel, 0);
         contentView.setOnClickPendingIntent(R.id.bt_notic_cancel, pIntentCancel);*/
+
         //builder.setPriority(Notification.PRIORITY_DEFAULT);
         //builder.setWhen(System.currentTimeMillis());
         //builder.setTicker("正在播放");
@@ -540,18 +545,19 @@ public class MediaService extends Service {
         sendBroadcast(intent);
     }
 
+    //与activity通信
     private void sendMessage_1(){
-        Message msg2 = MainActivity.mHandler.obtainMessage();
-        msg2.what=1;
-        MainActivity.mHandler.sendMessage(msg2);
+        callback.onDataChange(data);
     }
-    private void sendMessage_2(){
-        Message msg = SixthActivity.mHandler.obtainMessage();
-        msg.what=1;
-        if(SixActivityIsOnCreate.Getsaioc()==1){
-            SixthActivity.mHandler.sendMessage(msg);
-        }
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
     }
+
+    public static interface Callback{
+        void onDataChange(String data);
+    }
+
 
     @Override
     public void onDestroy() {

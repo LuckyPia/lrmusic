@@ -55,12 +55,6 @@ import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 
 
 public class MainActivity extends BaseActivity implements View.OnClickListener,SwipeRefreshLayout.OnRefreshListener {
@@ -69,7 +63,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
 
     private static String TAG = "MainActivity";//当前Activity标记
     MyApp app = null;//加载MyApp
-    private static MyAdapter adapter;
+    private MyAdapter adapter;
     Intent MediaServiceIntent;//服务实例
     private static  MediaService.MyBinder mMyBinder;//绑定实例
     long startTime = 0;
@@ -77,20 +71,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
 
     RecyclerView rv = null;//
     private FloatingActionButton fab;//收藏按钮
-    private static ProgressBar musicProcessBar;//底部进度条
-    private static  CircleProgressBar circleProgressBar;//圆形进度条
-    private static TextView musicNameTextView;//音乐播放音乐名称
-    private static TextView musicArtistTextView;//音乐播放歌手名称
+    private ProgressBar musicProcessBar;//底部进度条
+    private CircleProgressBar circleProgressBar;//圆形进度条
+    private TextView musicNameTextView;//音乐播放音乐名称
+    private TextView musicArtistTextView;//音乐播放歌手名称
     private ImageView musicPlayListBtn;//音乐播放播放列表按钮，已移除
-    private static ImageView musicPlayBtn;//音乐播放播放或者暂停按钮
-    private static ImageView musicNextBtn;//音乐播放下一曲按钮
+    private ImageView musicPlayBtn;//音乐播放播放或者暂停按钮
+    private ImageView musicNextBtn;//音乐播放下一曲按钮
 
 
     /*
     *底部控制栏相关
      */
-    public static View mFloatView;//底部控制栏布局
-    public static FrameLayout mContentContainer;
+    public View mFloatView;//底部控制栏布局
+    public FrameLayout mContentContainer;
     private SwipeRefreshLayout swipeRefresh;//下拉刷新
     FrameLayout.LayoutParams layoutParams;
     Boolean musicControlisOnCreate=false;
@@ -100,7 +94,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     private int mTouchShop;//最小滑动距离
 
     @SuppressLint("HandlerLeak")
-    public static Handler mHandler=new Handler(){
+    public  Handler mHandler=new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
@@ -218,7 +212,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
             @Override
             public void onClick(View v) {
                 Intent favorite_layout = new Intent(MainActivity.this,FavoriteListActivity.class);
-                //startActivity(favorite_layout);
                 startActivity(favorite_layout, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
             }
         });
@@ -251,12 +244,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         }).start();
     }
 
-    private int getFileSize(File f) throws IOException {
+    /*private int getFileSize(File f) throws IOException {
         FileInputStream fis = new FileInputStream(f);
         int size = fis.available();
         fis.close();
         return size;
-    }
+    }*/
 
     public void musicControl(){
         mFloatView = LayoutInflater.from(getBaseContext()).inflate(R.layout.float_music_control_layout,null);
@@ -330,12 +323,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
                 new String[]{"歌曲名称", "歌曲歌手", "歌曲路径"},
                 new int[]{R.id.item_song_name, R.id.item_song_size, R.id.item_song_path});*/
 
-        //获取ListViw 控件对象
+        //获取RecyclerView 控件对象
         rv = (RecyclerView) findViewById(R.id.song_list);
         rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         /*  NestedScrolling机制能够让父View和子View在滚动式进行配合
         *   在这套机制中子View是发起者，父view是接受回调并做出响应的。
         *   方法只有在Android5.0以上才有效果，需要判断android版本是否在5.0(棒棒糖)以上
+        *   运用RecyclerView就不会出现此问题
         */
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             rv.setNestedScrollingEnabled(true);
@@ -362,7 +356,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
                 }
                 layoutParams.bottomMargin = 0;
                 newUI();
-                //adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -370,7 +363,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
                 int position = rv.getChildAdapterPosition(view);
                 show_Toast("长按"+position);
             }
-
 
         });
         rv.setAdapter(adapter);
@@ -417,13 +409,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mMyBinder = (MediaService.MyBinder) service;
-            //newUI();
             //mMediaService = ((MediaService.MyBinder) service).getInstance();
+            mMyBinder.getMyService().setCallback(new MediaService.Callback(){
+                @Override
+                public void onDataChange(String data) {
+                    Message msg = new Message();
+                    Bundle b = new Bundle();
+                    b.putString("data",data);
+                    msg.setData(b);
+                    msg.what=1;
+                    mHandler.sendMessage(msg);
+                }
+            });
 
-            //mHandler.post(mRunnable);
             Log.d(TAG, "Service与MainActivity已连接");
         }
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
 
@@ -618,7 +618,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     /**
      * 更新ui
      */
-    public static void newUI(){
+    public  void newUI(){
         musicProcessBar.setMax(mMyBinder.getProgress());
         circleProgressBar.setMax(mMyBinder.getProgress());
         musicProcessBar.setProgress(mMyBinder.getPlayPosition());
