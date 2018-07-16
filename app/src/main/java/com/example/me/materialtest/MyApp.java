@@ -77,6 +77,7 @@ public class MyApp extends Application{
             dao.insert(info);
         }
         dao.close();
+
     }
     public boolean tableIsEmpty(){
         dao = MusicDao.getInstance(this);
@@ -103,7 +104,8 @@ public class MyApp extends Application{
         assert cursor != null;//尚不明确
         while(cursor.moveToNext())
         {
-            if(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))/1000>=120){
+            if(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))/60000>=1&&
+                    cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))/60000<=8){
                 String name;
                 String singer;
                 String songpath;
@@ -167,8 +169,6 @@ public class MyApp extends Application{
     @Override
     public void onTerminate() {
         long id = Thread.currentThread().getId();
-        //Intent i = new Intent(this, PlayService.class);
-        //stopService(i);
         Log.v(TAG, "onTerminate"+id);
         MusicDao.saveToDisk_serialize(this);
         super.onTerminate();

@@ -28,6 +28,6 @@ public class Preference{
 
     public String get(){
         sp = ctx.getSharedPreferences("config", Context.MODE_PRIVATE);
-        return sp.getString("TYPE", "1");
+        return sp.getString("TYPE", "0");
     }
 }

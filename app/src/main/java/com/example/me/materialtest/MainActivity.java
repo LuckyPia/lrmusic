@@ -2,11 +2,8 @@ package com.example.me.materialtest;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -14,26 +11,20 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.provider.SyncStateContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Transition;
-import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,15 +35,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RemoteViews;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 
@@ -65,7 +50,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     MyApp app = null;//加载MyApp
     private MyAdapter adapter;
     Intent MediaServiceIntent;//服务实例
-    private static  MediaService.MyBinder mMyBinder;//绑定实例
+    private static  MediaService.MyBinder mMyBinder=null;//绑定实例
     long startTime = 0;
 
 
@@ -92,6 +77,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     protected float mCurrentY;//滑动时Y的位置
     protected int direction;//判断是否上滑或者下滑的标志
     private int mTouchShop;//最小滑动距离
+    private boolean isPost=false;
 
     @SuppressLint("HandlerLeak")
     public  Handler mHandler=new Handler(){
@@ -99,9 +85,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case 1:
+                    if(!isPost){
+                        mHandler.post(mRunnable);
+                        isPost=true;
+                    }
                     newUI();
                     adapter.setCurrentItem(mMyBinder.getNowPlayPosition());
                     adapter.notifyDataSetChanged();
+                    break;
+                case 2:
+
+                    musicProcessBar.setProgress(mMyBinder.getPlayPosition());
+                    circleProgressBar.setProgress(mMyBinder.getPlayPosition());
+                    if (mMyBinder.isPlaying()) {
+                        musicPlayBtn.setImageResource(R.drawable.playbar_btn_pause);
+                    } else {
+                        musicPlayBtn.setImageResource(R.drawable.playbar_btn_play);
+                    }
                     break;
             }
             super.handleMessage(msg);
@@ -113,17 +113,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-
         setContentView(R.layout.activity_main);
-        MyAppWidgetProvider wp=new MyAppWidgetProvider();
         requestAllPower();
+        MyAppWidgetProvider wp=new MyAppWidgetProvider();
         app = (MyApp)getApplication();
         //View初始化
         initView();
-
-        //initNotificationBar();
 
         if(!app.tableIsEmpty()){
             bindService(MediaServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -131,7 +127,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
                 musicControl();
             }
             layoutParams.bottomMargin = -300;
-            mHandler.post(mRunnable);
         }else{
             show_Toast("当前列表没有歌曲，请点击右上角下载按钮刷新");
         }
@@ -204,7 +199,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         });
 
         swipeRefresh=(SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
-        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefresh.setColorSchemeResources(R.color.colorAccent,R.color.bg_black);
         swipeRefresh.setProgressViewEndTarget(false,200);
         swipeRefresh.setOnRefreshListener(this);
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -225,9 +220,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
             @Override
             public void run() {
                 try{
-                    swipeRefresh.setColorSchemeResources(R.color.bg_black);
                     app.update();
-                    mMyBinder.newList();
+                    if(mMyBinder!=null){
+                        mMyBinder.newList();
+                    }
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -235,14 +231,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
                     @Override
                     public void run() {
                         adapter.notifyDataSetChanged();
-                        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-                        show_Toast("刷新成功!");
                         swipeRefresh.setRefreshing(false);
+                        if(app.mp3List.isEmpty()){
+                            show_Toast("手机里暂时没有音乐，快去下载吧！");
+                        }else {
+                            show_Toast("刷新成功,共有"+app.mp3List.size()+"首音乐");
+                        }
                     }
                 });
             }
         }).start();
     }
+
+
 
     /*private int getFileSize(File f) throws IOException {
         FileInputStream fis = new FileInputStream(f);
@@ -350,12 +351,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
 
                 PlayFlag pf=new PlayFlag();
                 pf.setPlayflag(0);
-                mMyBinder.newMusic();
                 if(!musicControlisOnCreate){
                     musicControl();
                 }
                 layoutParams.bottomMargin = 0;
-                newUI();
+
+                mMyBinder.newMusic();
+
             }
 
             @Override
@@ -410,18 +412,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         public void onServiceConnected(ComponentName name, IBinder service) {
             mMyBinder = (MediaService.MyBinder) service;
             //mMediaService = ((MediaService.MyBinder) service).getInstance();
-            mMyBinder.getMyService().setCallback(new MediaService.Callback(){
-                @Override
-                public void onDataChange(String data) {
-                    Message msg = new Message();
-                    Bundle b = new Bundle();
-                    b.putString("data",data);
-                    msg.setData(b);
-                    msg.what=1;
-                    mHandler.sendMessage(msg);
-                }
-            });
-
+            receiveMessage();
             Log.d(TAG, "Service与MainActivity已连接");
         }
         @Override
@@ -566,24 +557,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.backup:
-                show_Toast("分享");
                 Intent seven_layout=new Intent(MainActivity.this,SevenActivity.class);
                 startActivity(seven_layout);
                 break;
             case R.id.delete:
-                show_Toast("刷新");
-                app.update();
-                adapter.notifyDataSetChanged();
-                //绑定服务
-                bindService(MediaServiceIntent, mServiceConnection,BIND_AUTO_CREATE);
-                if(!musicControlisOnCreate){
-                    musicControl();
+                swipeRefresh.setRefreshing(true);
+                onRefresh();
+
+                if(app.mp3List.isEmpty()){
+                }else {
+                    //绑定服务
+                    bindService(MediaServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+                    if (!musicControlisOnCreate) {
+                        musicControl();
+                    }
+                    layoutParams.bottomMargin = -300;
+                    mHandler.post(mRunnable);
                 }
-                layoutParams.bottomMargin = -300;
-                mHandler.post(mRunnable);
                 break;
             case R.id.setting:
-                show_Toast("搜索");
                 Intent search_activity=new Intent(MainActivity.this,SearchActivity.class);
                 startActivity(search_activity);
                 break;
@@ -595,11 +587,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         return true;
     }
 
-    /*class ItemViewHolder{
-        TextView name, singer,musicduration;
-        CheckBox cbx;
-    }*/
-
     /**
      * 更新ui的runnable
      */
@@ -607,7 +594,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         @Override
         public void run() {
             try {
-                newUI();
+                mHandler.sendEmptyMessage(2);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -632,6 +619,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
         }
     }
 
+    private void receiveMessage(){
+        mMyBinder.getMyService().setCallback(new MediaService.Callback(){
+            @Override
+            public void onDataChange(String data) {
+                Message msg = new Message();
+                Bundle b = new Bundle();
+                b.putString("data",data);
+                msg.setData(b);
+                msg.what=1;
+                mHandler.sendMessage(msg);
+            }
+        });
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -641,6 +642,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     @Override
     protected void onRestart() {
         super.onRestart();
+        receiveMessage();
         mHandler.post(mRunnable);
     }
 

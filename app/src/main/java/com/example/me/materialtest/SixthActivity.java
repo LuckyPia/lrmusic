@@ -96,6 +96,10 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
                         imageButton.setImageResource(R.drawable.ic_play);
                     }
                     break;
+                case 2:
+                    mSeekBar.setProgress(mMyBinder.getPlayPosition());
+                    mTextView.setText(time.format(mMyBinder.getPlayPosition()));
+                    break;
             }
             super.handleMessage(msg);
 
@@ -187,6 +191,7 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
             setupVisualizerFxAndUi();
             newUI();
             Log.d(TAG, "Service与SixthActivity已连接");
+
             intent=getIntent();
             if(newi!=-1){
                 newf.setFlag(newi);
@@ -254,14 +259,11 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
         Preference p = Preference.getInstance(SixthActivity.this);
         String type = p.get();
         if(type.equals("0")){
-            musicPlay.setImageResource(R.drawable.music_playmode_listloop);
-            //musicPlay.setText("顺序播放");
+            musicPlay.setImageResource(R.drawable.music_playmode_listloop);//顺序播放
         }else if(type.equals("1")){
-            musicPlay.setImageResource(R.drawable.music_playmode_singloop);
-            //musicPlay.setText("单曲循环");
+            musicPlay.setImageResource(R.drawable.music_playmode_singloop);//单曲循环
         }else if(type.equals("2")){
-            musicPlay.setImageResource(R.drawable.music_playmode_random);
-            //musicPlay.setText("随机播放");
+            musicPlay.setImageResource(R.drawable.music_playmode_random);//随机播放
         }
     }
 
@@ -348,7 +350,6 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         //handler发送是定时1000s发送，如果不关闭，MediaPlayer release掉了还在获取getCurrentPosition就会爆IllegalStateException错误
         //mMyBinder.closeMedia();
         mHandler.removeCallbacks(mRunnable);
@@ -359,7 +360,6 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.v("SixthActivity","onPause()");
         mHandler.removeCallbacks(mRunnable);
         mVisualizer.release();
     }
@@ -367,7 +367,6 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.v("SixthActivity","onRestart()");
         mHandler.post(mRunnable);
         setupVisualizerFxAndUi();
     }
@@ -378,8 +377,7 @@ public class SixthActivity extends BaseActivity implements View.OnClickListener 
     private Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
-            mSeekBar.setProgress(mMyBinder.getPlayPosition());
-            mTextView.setText(time.format(mMyBinder.getPlayPosition()));
+            mHandler.sendEmptyMessage(2);
             mHandler.postDelayed(mRunnable, 1000);
         }
     };

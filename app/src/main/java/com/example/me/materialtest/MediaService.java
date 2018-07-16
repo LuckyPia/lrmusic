@@ -13,20 +13,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.Builder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.Message;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -37,40 +31,38 @@ import static android.app.Notification.VISIBILITY_PUBLIC;
 
 /**
  * Created by NIWA on 2017/3/17.
+ * Modify by Lucky on 2018/7/15.
  */
 
 public class MediaService extends Service {
 
     private static final String TAG = "MediaService";
+    private String data = "服务正在运行";
     private MyBinder mBinder = new MyBinder();
-    //标记当前歌曲的序号
-    private static int i = 0;
-    private static  String path;
+    private static int index = 0;//标记当前歌曲的序号
     private Preference p;
     private String type;
+    private boolean isNotificationBarOnCreate=false;
+
     List<Mp3Info> mp3List = new ArrayList<Mp3Info>();
     List<Mp3Info> favoriteList = new ArrayList<Mp3Info>();
     List<Mp3Info> playList=new ArrayList<Mp3Info>();//音乐准备播放列表
 
-    public NotificationManager mNotificationManager;
     private NotificationCompat.Builder builder;
     private RemoteViews contentView;
-    //初始化MediaPlayer
-    private static MediaPlayer mediaPlayer = null;
     private Callback callback;
-    private String data = "服务正在运行";
-
-
-    public MediaPlayer mMediaPlayer=getMedia();
+    public NotificationManager mNotificationManager;
     private MusicDao dao = null;
+    MyApp app=null;
 
     private Notification notification;
     private RemoteViews remoteViews;
     private ButtonBroadcastReceiver playerReceiver;
-
     private NotificationManager manager;
-    MyApp app=null;
 
+
+    private static MediaPlayer mediaPlayer = null;//初始化MediaPlayer
+    public MediaPlayer mMediaPlayer=getMedia();
     static MediaPlayer getMedia(){
         //单例模式
         if(mediaPlayer == null){
@@ -83,6 +75,7 @@ public class MediaService extends Service {
         dao.init();
         dao.query(mp3List,favoriteList);
         dao.close();
+        //出问题了，目前找不到解决方法！！！
         /*app = (MyApp)getApplication();
         this.mp3List=app.mp3List;
         this.favoriteList=app.favoriteList;*/
@@ -102,27 +95,22 @@ public class MediaService extends Service {
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            String channelId ="chat";
-            String channelName ="聊天消息";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
+            String channelId ="subscribe";
+            String channelName ="订阅消息";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
             createNotificationChannel(channelId, channelName, importance);
 
-            channelId ="subscribe";
-            channelName ="订阅消息";
-            importance = NotificationManager.IMPORTANCE_DEFAULT;
-
-            createNotificationChannel(channelId, channelName, importance);
             channelId ="321";
             channelName ="通知栏播放控制";
             importance = NotificationManager.IMPORTANCE_LOW;
             createNotificationChannel(channelId, channelName, importance);
         }
         initNotificationBar();
+        updateAppWidget();
     }
 
     public MediaService() {
         //File sdcardFile = new File("/mnt/sdcard/music");
-
         //File sdcardFile = Environment.getExternalStorageDirectory();
         try{
             //getMp3FromSDcard(sdcardFile);
@@ -136,8 +124,8 @@ public class MediaService extends Service {
         }catch(Exception e){
             e.printStackTrace();
         }
-        i = Flag.Getflag();
-        iniMediaPlayerFile(i);
+        index = Flag.Getflag();
+        iniMediaPlayerFile(index);
 
 
         //播放完成监听
@@ -150,29 +138,29 @@ public class MediaService extends Service {
 
                 switch (type){
                     case "0":
-                        if(i==playList.size()-1){
-                            i=0;
-                            iniMediaPlayerFile(i);
+                        if(index==playList.size()-1){
+                            index=0;
+                            iniMediaPlayerFile(index);
                             mMediaPlayer.start();
 
                         }else {
-                            i++;
-                            iniMediaPlayerFile(i);
+                            index++;
+                            iniMediaPlayerFile(index);
                             mMediaPlayer.start();
                         }
                         break;
                     case "1":
-                        iniMediaPlayerFile(i);
+                        iniMediaPlayerFile(index);
                         mMediaPlayer.start();
                         break;
                     case "2":
                         Random rand = new Random();
-                        i = rand.nextInt(playList.size());
-                        iniMediaPlayerFile(i);
+                        index = rand.nextInt(playList.size());
+                        iniMediaPlayerFile(index);
                         mMediaPlayer.start();
                         break;
                 }
-                initNotificationBar();
+                newNotificationBar();
                 sendMessage_1();
 
             }
@@ -210,7 +198,7 @@ public class MediaService extends Service {
                 //如果还没开始播放，就开始
                 mMediaPlayer.start();
             }
-            initNotificationBar();
+            newNotificationBar();
         }
 
         /**
@@ -221,7 +209,7 @@ public class MediaService extends Service {
                 //暂停
                 mMediaPlayer.pause();
             }
-            initNotificationBar();
+            newNotificationBar();
         }
 
         public void ppMusic(){
@@ -230,17 +218,9 @@ public class MediaService extends Service {
             }else{
                 mMediaPlayer.start();
             }
-            initNotificationBar();
+            newNotificationBar();
         }
-        /**
-         * reset
-         */
-        public void resetMusic() {
-            if (mMediaPlayer.isPlaying()) {
-                //重置
-                mMediaPlayer.reset();
-            }
-        }
+
 
         /**
          * 关闭播放器
@@ -264,23 +244,23 @@ public class MediaService extends Service {
                 type = p.get();
                 if (type.equals("2")) {
                     Random rand = new Random();
-                    i = rand.nextInt(playList.size());
-                    iniMediaPlayerFile(i);
+                    index = rand.nextInt(playList.size());
+                    iniMediaPlayerFile(index);
                     playMusic();
                 } else {
                     //不让歌曲的序号越界
-                    if (i == playList.size() - 1) {
-                        i = 0;
-                        iniMediaPlayerFile(i);
+                    if (index == playList.size() - 1) {
+                        index = 0;
+                        iniMediaPlayerFile(index);
                         playMusic();
                     } else {
-                        i = i + 1;
-                        iniMediaPlayerFile(i);
+                        index = index + 1;
+                        iniMediaPlayerFile(index);
                         playMusic();
                     }
                 }
             }
-            initNotificationBar();
+            newNotificationBar();
             sendMessage_1();
         }
 
@@ -290,17 +270,17 @@ public class MediaService extends Service {
         public void preciousMusic() {
             if (mMediaPlayer != null) {
                 //mMediaPlayer.reset();
-                if (i == 0) {
-                    i=playList.size()-1;
-                    iniMediaPlayerFile(i);
+                if (index == 0) {
+                    index=playList.size()-1;
+                    iniMediaPlayerFile(index);
                     mMediaPlayer.start();
                 } else {
-                    i = i - 1;
-                    iniMediaPlayerFile(i);
+                    index = index - 1;
+                    iniMediaPlayerFile(index);
                     mMediaPlayer.start();
                 }
             }
-            initNotificationBar();
+            newNotificationBar();
             sendMessage_1();
         }
 
@@ -315,9 +295,9 @@ public class MediaService extends Service {
                 playList=mp3List;
             }
 
-            if(i != Flag.Getflag()){
-                i = Flag.Getflag();
-                iniMediaPlayerFile(i);
+            if(index != Flag.Getflag()){
+                index = Flag.Getflag();
+                iniMediaPlayerFile(index);
                 mMediaPlayer.start();
              }else {
                 if (isPlaying()) {
@@ -326,7 +306,7 @@ public class MediaService extends Service {
                     mMediaPlayer.start();
                 }
             }
-            initNotificationBar();
+            newNotificationBar();
             sendMessage_1();
 
         }
@@ -343,13 +323,13 @@ public class MediaService extends Service {
         }
 
         public int getPlayNum() {
-            return i;
+            return index;
         }
         /**
          * 获取当前播放歌曲序号
          */
         public int getNowPlayPosition() {
-            return i;
+            return index;
         }
         /**
          * 播放指定位置
@@ -358,10 +338,10 @@ public class MediaService extends Service {
             mMediaPlayer.seekTo(msec);
         }
         public String getSongName(){
-            return playList.get(i).getName();
+            return playList.get(index).getName();
         }
         public String getSingerName(){
-            return  playList.get(i).getSinger();
+            return  playList.get(index).getSinger();
         }
         public Boolean isPlaying(){
             return  mMediaPlayer.isPlaying();
@@ -387,20 +367,28 @@ public class MediaService extends Service {
         //获取文件路径
         try {
             //此处的两个方法需要捕获IO异常
+            /*mMediaPlayer.reset();
+            if(playList.isEmpty()){
+                mMediaPlayer=MediaPlayer.create(this, R.raw.china_x);
+                mMediaPlayer.prepare();
+            }else{
+                //设置音频文件到MediaPlayer对象中
+                mMediaPlayer.setDataSource(playList.get(dex).getPath());
+                //播放历史列表，待完善
+                //playList.add(i);
+                //让MediaPlayer对象准备
+                mMediaPlayer.prepare();
+            }*/
             mMediaPlayer.reset();
-            //设置音频文件到MediaPlayer对象中
-            mMediaPlayer.setDataSource(playList.get(i).getPath());
-            //播放历史列表，待完善
-            //playList.add(i);
+            mMediaPlayer.setDataSource(playList.get(dex).getPath());
             //让MediaPlayer对象准备
             mMediaPlayer.prepare();
+
         } catch (IOException e) {
             Log.d(TAG, "设置资源出错");
             e.printStackTrace();
         }
     }
-
-
 
     public class ButtonBroadcastReceiver extends BroadcastReceiver {
 
@@ -444,15 +432,20 @@ public class MediaService extends Service {
     }
 
     public void newNotificationBar(){
-        contentView.setTextViewText(R.id.song_name, mBinder.getSongName());
-        contentView.setTextViewText(R.id.song_singer, mBinder.getSingerName());
-        if(mMediaPlayer.isPlaying()){
-            contentView.setImageViewResource(R.id.n_play,R.drawable.ic_stop);
+        updateAppWidget();
+        if(isNotificationBarOnCreate) {
+            contentView.setTextViewText(R.id.song_name, mBinder.getSongName());
+            contentView.setTextViewText(R.id.song_singer, mBinder.getSingerName());
+            if (mMediaPlayer.isPlaying()) {
+                contentView.setImageViewResource(R.id.n_play, R.drawable.ic_stop);
+            } else {
+                contentView.setImageViewResource(R.id.n_play, R.drawable.ic_play);
+            }
+            startForeground(1, notification);
         }else{
-            contentView.setImageViewResource(R.id.n_play,R.drawable.ic_play);
+            initNotificationBar();
         }
     }
-
 
     public void initNotificationBar() {
         //初始化通知
@@ -462,11 +455,8 @@ public class MediaService extends Service {
         } else {
             builder = new NotificationCompat.Builder(this);
         }
-        updateAppWidget();
 
         contentView = new RemoteViews(getPackageName(), R.layout.customnotice);
-        //更新UI
-        newNotificationBar();
 
         Intent intentPlay = new Intent("play");//新建意图，并设置action标记为"play"，用于接收广播时过滤意图信息
         PendingIntent pIntentPlay = PendingIntent.getBroadcast(this, 0, intentPlay, 0);
@@ -500,7 +490,6 @@ public class MediaService extends Service {
         builder.setVisibility(VISIBILITY_PUBLIC);
         builder.setSound(null);
         builder.setSmallIcon(R.drawable.n_music);
-
         builder.setOngoing(true);//true：必须手动清除代码
         //builder.setAutoCancel(true);
         builder.setContent(contentView);
@@ -508,13 +497,13 @@ public class MediaService extends Service {
         //builder.setDefaults(Notification.DEFAULT_VIBRATE);
         //builder.setContentTitle("12321312");
         //builder.setContentText("21312312231");
-
         notification = builder.build();
-
         //notification.flags = notification.FLAG_NO_CLEAR;//设置通知点击或滑动时不被清除
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         //manager.notify(200, notification);//开启通知
-        startForeground(1,notification);
+        //更新UI
+        isNotificationBarOnCreate=true;
+        newNotificationBar();
 
     }
     @TargetApi(Build.VERSION_CODES.O)
@@ -547,7 +536,18 @@ public class MediaService extends Service {
 
     //与activity通信
     private void sendMessage_1(){
-        callback.onDataChange(data);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Thread.sleep(100);
+                    callback.onDataChange(data);
+                    Thread.yield();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void setCallback(Callback callback) {
@@ -557,7 +557,6 @@ public class MediaService extends Service {
     public static interface Callback{
         void onDataChange(String data);
     }
-
 
     @Override
     public void onDestroy() {

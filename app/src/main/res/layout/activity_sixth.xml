@@ -41,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/bg_black"
+            android:textColor="@color/text_white"
             android:textSize="18dp" />
 
         <TextView
@@ -51,7 +51,7 @@
             android:layout_below="@id/text3"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="5dp"
-            android:textColor="@color/bg_black"
+            android:textColor="@color/text_white"
             android:textSize="12dp" />
 
     </RelativeLayout>
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:textColor="#000000"
+            android:textColor="@color/text_white"
             android:textSize="12dp" />
 
         <TextView
@@ -95,7 +95,7 @@
             android:layout_marginTop="42dp"
             android:layout_toLeftOf="@+id/seekbar"
             android:text="00:00"
-            android:textColor="#000000"
+            android:textColor="@color/text_white"
             android:textSize="12dp" />
 
         <SeekBar
@@ -114,7 +114,7 @@
             android:layout_marginTop="42dp"
             android:layout_toRightOf="@+id/seekbar"
             android:text="00:00"
-            android:textColor="#000000"
+            android:textColor="@color/text_white"
             android:textSize="12dp" />
 
         <ImageButton

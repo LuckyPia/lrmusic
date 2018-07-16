@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class WaveformView extends View {
     private Paint mPaint;
     private float mStrokeWidth =4;
@@ -25,6 +28,12 @@ class WaveformView extends View {
     protected Visualizer mVisualizer = null;
     private int levelStep = 0;
     protected final static int CYLINDER_NUM = 128;
+
+    List<LinePoint> linePointList = new ArrayList<LinePoint>();
+    LinePoint linePoint;
+    double angle1,angle2;
+    float x1,y1,x2,y2,x3,y3;
+    private boolean isCreate=false;
 
     boolean mDataEn = true;
 
@@ -76,23 +85,37 @@ class WaveformView extends View {
         //Log.v("wave","数量"+CYLINDER_NUM);
         if(mBytes==null){
         }else{
+            if(!isCreate){
+                for(int i = 0; i < CYLINDER_NUM; i++){
+                    double a=360/CYLINDER_NUM;//直接用a会有问题，所以还是用2.81代替
+                    //R * cos (PI/180*一次旋转的角度数) ,-R * sin (PI/180*一次旋转的角度数)
+                    angle1=Math.cos((i * 2.81)*Math.PI/180);
+                    angle2=-Math.sin((i * 2.81)*Math.PI/180);
+                    x1=(float)(r0*angle1)+ox;
+                    y1=(float)(r0*angle2)+oy;
+                    linePoint=new LinePoint(angle1,angle2,x1,y1);
+
+                    linePointList.add(linePoint);
+                }
+                isCreate=true;
+            }
+
             for(int i = 0; i < CYLINDER_NUM; i++){
-                //R * cos (PI/180*一次旋转的角度数) ,-R * sin (PI/180*一次旋转的角度数)
-                double angle1=Math.cos((i * 2.81)*Math.PI/180);
-                double angle2=-Math.sin((i * 2.81)*Math.PI/180);
-                float x1=(float)(r0*angle1)+ox;
-                float y1=(float)(r0*angle2)+oy;
-                float x2=(float)((r0+1+mBytes[i])*angle1)+ox;
-                float y2=(float)((r0+1+mBytes[i])*angle2)+oy;
-                float x3=(float)((r0-mBytes[i])*angle1)+ox;
-                float y3=(float)((r0-mBytes[i])*angle2)+oy;
+
+                angle1=linePointList.get(i).getAngle1();
+                angle2=linePointList.get(i).getAngle2();
+                x1=linePointList.get(i).getX1();
+                y1=linePointList.get(i).getY1();
+
+                x2=(float)((r0+1+mBytes[i])*angle1)+ox;
+                y2=(float)((r0+1+mBytes[i])*angle2)+oy;
+                x3=(float)((r0-mBytes[i])*angle1)+ox;
+                y3=(float)((r0-mBytes[i])*angle2)+oy;
 
                 canvas.drawLine(x1,y1,x2,y2,mPaint);
                 canvas.drawPoint(x3,y3,mPaint);
             }
         }
-
-
     }
 
     public int getRealSize(int measureSpec) {
@@ -118,18 +141,18 @@ class WaveformView extends View {
         model[0] = (byte) Math.abs(fft[0]);
         if(model[0]<0){
             model[0]=0;
-        }else if(model[0]>60){
-            model[0]=60;
+        }/*else if(model[0]>60){
+            model[0]=80;
         }
-
+*/
         for (int i = 1, j = 1; j < CYLINDER_NUM;)
         {
             model[j] = (byte) Math.hypot(fft[i], fft[i + 1]);
             if(model[j]<0){
                 model[j]=0;
-            }else if(model[j]>60){
-                model[j]=60;
-            }
+            }/*else if(model[j]>80){
+                model[j]=80;
+            }*/
             i += 1;
             j++;
         }
