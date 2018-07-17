@@ -53,7 +53,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,S
     private static  MediaService.MyBinder mMyBinder=null;//绑定实例
     long startTime = 0;
 
-
     RecyclerView rv = null;//
     private FloatingActionButton fab;//收藏按钮
     private ProgressBar musicProcessBar;//底部进度条
